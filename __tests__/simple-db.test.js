@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
+const shortid = require('shortid');
 
 const { CI, HOME } = process.env;
 const BASE_DIR = CI ? HOME : __dirname;
@@ -12,8 +13,15 @@ describe('simple database', () => {
     await fs.mkdir(TEST_DIR, { recursive: true });
   });
 
-  it('needs a first test...', async () => {
+  it('should save a json file in the store dir and then retrieve', () => {
+    const shortyId = shortid.generate();
+    const storeHouse = new SimpleDb(rootDir);
+    const jsonFile = { id: `${shortyId}`, name:'nombre' } ;
 
+    return storeHouse
+      .save(jsonFile)
+      .then(() => storeHouse.get(jsonFile.id))
+      .then((retrievedFile) => expect(retrievedFile).toEqual(jsonFile));
   });
 
 });
