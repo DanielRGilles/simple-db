@@ -17,7 +17,7 @@ describe('simple database', () => {
   beforeEach(clearStore);
   afterEach(clearStore);
 
-  it('should save a json file in the store dir and then retrieve', async() => {
+  it('should save a json file in the store dir and then retrieve Testing both get and save methods', async() => {
     const shortyId = shortid.generate();
     const storeHouse = new SimpleDb(TEST_DIR);
     const jsonFile = { id: `${shortyId}`, name:'nombre' } ;
