@@ -1,6 +1,7 @@
-const fs = require('fs/promises');
+const { mkdir, rm} = require('fs/promises');
 const path = require('path');
 const shortid = require('shortid');
+const SimpleDb = require('../lib/simple-db');
 
 const { CI, HOME } = process.env;
 const BASE_DIR = CI ? HOME : __dirname;
@@ -8,20 +9,49 @@ const TEST_DIR = path.join(BASE_DIR, 'test-dir');
 
 describe('simple database', () => {
 
-  beforeEach(async () => {
-    await fs.rm(TEST_DIR, { force: true, recursive: true });
-    await fs.mkdir(TEST_DIR, { recursive: true });
-  });
+  const rootDir = './test-dir/';
 
-  it('should save a json file in the store dir and then retrieve', () => {
+  const clearStore = async () => {
+    await rm(rootDir, { force: true, recursive: true });
+    return await mkdir(rootDir, { recursive: true });
+  };
+
+  beforeEach(clearStore);
+  afterEach(clearStore);
+
+  it('should save a json file in the store dir and then retrieve', async() => {
     const shortyId = shortid.generate();
     const storeHouse = new SimpleDb(rootDir);
     const jsonFile = { id: `${shortyId}`, name:'nombre' } ;
 
-    return storeHouse
-      .save(jsonFile)
-      .then(() => storeHouse.get(jsonFile.id))
-      .then((retrievedFile) => expect(retrievedFile).toEqual(jsonFile));
+    await storeHouse.save(jsonFile)
+    const gotFile = await storeHouse.get(jsonFile.id);
+    expect(jsonFile).toEqual(gotFile);
   });
+  it('should return not found for this one since nothing is being stored ', async() => {
+    const storeHouse = new SimpleDb(rootDir);
+    const gotFile = await storeHouse.get()
+     expect(gotFile).toEqual('Not Found');
 
+  });
+  it('should return an array of objects that come from the files in the dir', async() => {
+    const jsonFile1 = { name:'test1' } ;
+    const jsonFile2 = { name:'test2' } ;
+    const jsonFile3 = { name:'test3' } ;
+    const jsonFile4 = { name:'test4' } ;
+    const storeHouse = new SimpleDb(rootDir);
+    const expectation = [
+      { id: expect.any(String), name:'test1' },
+      { id: expect.any(String), name:'test2' },
+      { id: expect.any(String), name:'test3' },
+      { id: expect.any(String), name:'test4' }
+    ];
+    await storeHouse.save(jsonFile1);
+    await storeHouse.save(jsonFile2);
+    await storeHouse.save(jsonFile3);
+    await storeHouse.save(jsonFile4);
+      
+    const allOfthem = await storeHouse.getAll();
+     expect(allOfthem).toEqual(expect.arrayContaining( expectation ));
+  });
 });
