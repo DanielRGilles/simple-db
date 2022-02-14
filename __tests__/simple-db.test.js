@@ -9,11 +9,9 @@ const TEST_DIR = path.join(BASE_DIR, 'test-dir');
 
 describe('simple database', () => {
 
-  const rootDir = './test-dir/';
-
   const clearStore = async () => {
-    await rm(rootDir, { force: true, recursive: true });
-    return await mkdir(rootDir, { recursive: true });
+    await rm(TEST_DIR, { force: true, recursive: true });
+    return await mkdir(TEST_DIR, { recursive: true });
   };
 
   beforeEach(clearStore);
@@ -21,7 +19,7 @@ describe('simple database', () => {
 
   it('should save a json file in the store dir and then retrieve', async() => {
     const shortyId = shortid.generate();
-    const storeHouse = new SimpleDb(rootDir);
+    const storeHouse = new SimpleDb(TEST_DIR);
     const jsonFile = { id: `${shortyId}`, name:'nombre' } ;
 
     await storeHouse.save(jsonFile)
@@ -29,7 +27,7 @@ describe('simple database', () => {
     expect(jsonFile).toEqual(gotFile);
   });
   it('should return not found for this one since nothing is being stored ', async() => {
-    const storeHouse = new SimpleDb(rootDir);
+    const storeHouse = new SimpleDb(TEST_DIR);
     const gotFile = await storeHouse.get()
      expect(gotFile).toEqual('Not Found');
 
@@ -39,7 +37,7 @@ describe('simple database', () => {
     const jsonFile2 = { name:'test2' } ;
     const jsonFile3 = { name:'test3' } ;
     const jsonFile4 = { name:'test4' } ;
-    const storeHouse = new SimpleDb(rootDir);
+    const storeHouse = new SimpleDb(TEST_DIR);
     const expectation = [
       { id: expect.any(String), name:'test1' },
       { id: expect.any(String), name:'test2' },
